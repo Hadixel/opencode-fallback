@@ -44,6 +44,30 @@ Or from source:
 go install github.com/Hadixel/opencode-fallback@latest
 ```
 
+### Windows (PowerShell)
+
+```powershell
+irm https://raw.githubusercontent.com/Hadixel/opencode-fallback/main/run.ps1 | iex
+```
+
+That installs `ocf.exe` to `%USERPROFILE%\.local\bin` and asks for a prompt. To pass the
+prompt in the same line:
+
+```powershell
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/Hadixel/opencode-fallback/main/run.ps1))) "explain this stack trace"
+```
+
+Install only, or run an explicit command:
+
+```powershell
+irm https://raw.githubusercontent.com/Hadixel/opencode-fallback/main/install.ps1 | iex
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/Hadixel/opencode-fallback/main/run.ps1))) check
+```
+
+The PowerShell scripts use the prebuilt binary from the
+[latest release](https://github.com/Hadixel/opencode-fallback/releases) and only fall back to
+`go build` when there is no asset for the machine.
+
 Requires `opencode` on `PATH`.
 
 ## Use

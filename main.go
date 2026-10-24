@@ -19,6 +19,8 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -220,7 +222,10 @@ const (
 func attempt(model, prompt, cwd string, timeout time.Duration, stream bool) (outcome, string) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
-	cmd := exec.CommandContext(ctx, "opencode", "run", "-m", model, prompt)
+	cmd, err := opencodeCmd(ctx, "run", "-m", model, prompt)
+	if err != nil {
+		return resultFailed, fmt.Sprintf("ocf: %v\n", err)
+	}
 	if cwd != "" {
 		cmd.Dir = cwd
 	}
@@ -248,6 +253,23 @@ func attempt(model, prompt, cwd string, timeout time.Duration, stream bool) (out
 	default:
 		return resultOK, text
 	}
+}
+
+// opencodeCmd builds the command that launches the official client. On Windows
+// the npm shim is a .cmd file, which CreateProcess cannot start directly, so it
+// is run through cmd.exe instead of relying on path-resolution quirks.
+func opencodeCmd(ctx context.Context, args ...string) (*exec.Cmd, error) {
+	path, err := exec.LookPath("opencode")
+	if err != nil {
+		return nil, err
+	}
+	if runtime.GOOS == "windows" {
+		switch strings.ToLower(filepath.Ext(path)) {
+		case ".cmd", ".bat":
+			return exec.CommandContext(ctx, "cmd.exe", append([]string{"/c", path}, args...)...), nil
+		}
+	}
+	return exec.CommandContext(ctx, path, args...), nil
 }
 
 var limitedMarkers = []string{
