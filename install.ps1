@@ -23,10 +23,17 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$asset = switch ($env:PROCESSOR_ARCHITECTURE.ToUpperInvariant()) {
+$arch = if ($env:PROCESSOR_ARCHITECTURE) {
+    $env:PROCESSOR_ARCHITECTURE
+}
+else {
+    [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()
+}
+$asset = switch ($arch.ToUpperInvariant()) {
     'AMD64' { 'ocf_windows_amd64.exe' }
+    'X64' { 'ocf_windows_amd64.exe' }
     'ARM64' { 'ocf_windows_arm64.exe' }
-    default { throw "ocf: unsupported architecture: $env:PROCESSOR_ARCHITECTURE" }
+    default { throw "ocf: unsupported architecture: $arch" }
 }
 
 $dir = Split-Path -Parent $Bin
@@ -36,6 +43,7 @@ $installed = $false
 try {
     Write-Host "ocf: downloading $asset"
     Invoke-WebRequest -UseBasicParsing -Uri "$Repo/releases/latest/download/$asset" -OutFile $Bin
+    Unblock-File -Path $Bin -ErrorAction SilentlyContinue
     $installed = $true
 }
 catch {

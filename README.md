@@ -66,7 +66,8 @@ irm https://raw.githubusercontent.com/Hadixel/opencode-fallback/main/install.ps1
 
 The PowerShell scripts use the prebuilt binary from the
 [latest release](https://github.com/Hadixel/opencode-fallback/releases) and only fall back to
-`go build` when there is no asset for the machine.
+`go build` when there is no asset for the machine. The binary is unsigned, so SmartScreen may
+ask for confirmation the first time.
 
 Requires `opencode` on `PATH`.
 

@@ -33,12 +33,23 @@ $ErrorActionPreference = 'Stop'
 $repo = if ($env:OCF_REPO) { $env:OCF_REPO } else { 'https://github.com/Hadixel/opencode-fallback' }
 $bin = if ($env:OCF_BIN) { $env:OCF_BIN } else { Join-Path $HOME '.local\bin\ocf.exe' }
 
-function Get-OcfAsset {
-    switch ($env:PROCESSOR_ARCHITECTURE.ToUpperInvariant()) {
-        'AMD64' { return 'ocf_windows_amd64.exe' }
-        'ARM64' { return 'ocf_windows_arm64.exe' }
-        default { throw "ocf: unsupported architecture: $env:PROCESSOR_ARCHITECTURE" }
+function Get-OcfArch {
+    $raw = if ($env:PROCESSOR_ARCHITECTURE) {
+        $env:PROCESSOR_ARCHITECTURE
     }
+    else {
+        [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()
+    }
+    switch ($raw.ToUpperInvariant()) {
+        'AMD64' { return 'amd64' }
+        'X64' { return 'amd64' }
+        'ARM64' { return 'arm64' }
+        default { throw "ocf: unsupported architecture: $raw" }
+    }
+}
+
+function Get-OcfAsset {
+    "ocf_windows_$(Get-OcfArch).exe"
 }
 
 function Install-Ocf {
@@ -49,6 +60,7 @@ function Install-Ocf {
     try {
         Write-Host "ocf: downloading $asset"
         Invoke-WebRequest -UseBasicParsing -Uri "$repo/releases/latest/download/$asset" -OutFile $bin
+        Unblock-File -Path $bin -ErrorAction SilentlyContinue
         return
     }
     catch {
