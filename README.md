@@ -19,12 +19,29 @@ out of the gate, and rotating VPN exits only helps when the new exit has an unsp
 What you *can* do is stop treating the limit as an error: try the next model you are entitled
 to. `ocf` does that.
 
-## Install
+## One line
 
 ```sh
-git clone https://github.com/Hadixel/opencode-fallback
-cd opencode-fallback
-go build -o ~/.local/bin/ocf .
+curl -fsSL https://raw.githubusercontent.com/Hadixel/opencode-fallback/main/run.sh | sh -s -- "explain this stack trace"
+```
+
+That installs `ocf` to `~/.local/bin` on first use (needs `git` and `go`), then runs it —
+a bare prompt means `ocf run <prompt>`. Explicit commands pass through:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/Hadixel/opencode-fallback/main/run.sh | sh -s -- check
+```
+
+Install only:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/Hadixel/opencode-fallback/main/install.sh | sh
+```
+
+Or from source:
+
+```sh
+go install github.com/Hadixel/opencode-fallback@latest
 ```
 
 Requires `opencode` on `PATH`.
